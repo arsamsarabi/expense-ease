@@ -8,7 +8,7 @@
 		"url": "https://arsam.dev"
 	},
 	"scripts": {
-		"build": "bun index.ts",
+		"start": "bun index.ts",
 		"dev": "bun --watch index.ts"
 	},
 	"devDependencies": {
