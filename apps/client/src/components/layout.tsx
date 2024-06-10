@@ -6,7 +6,7 @@ export const Layout = ({ children }: PropsWithChildren) => {
 		<>
 			<Navbar />
 			<hr />
-			{children}
+			<div className="p-2 max-w-3xl m-auto">{children}</div>
 		</>
 	)
 }
