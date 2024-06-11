@@ -22,7 +22,7 @@ const CreateExpense = () => {
 	const form = useForm({
 		defaultValues: {
 			title: '',
-			amount: 0,
+			amount: '0',
 		},
 		onSubmit: async ({ value }) => {
 			const res = await api.expenses.$post({ json: value })
@@ -80,9 +80,7 @@ const CreateExpense = () => {
 										name={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) =>
-											field.handleChange(Number.parseFloat(e.target.value))
-										}
+										onChange={(e) => field.handleChange(e.target.value)}
 										placeholder="14.99"
 										required
 										type="number"
