@@ -90,6 +90,6 @@ const Expenses = () => {
 	)
 }
 
-export const Route = createFileRoute('/expenses')({
+export const Route = createFileRoute('/_authenticated/expenses')({
 	component: Expenses,
 })
