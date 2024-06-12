@@ -1,0 +1,17 @@
+{
+	"name": "@repo/zod-shared-schema",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"dev": "tsup --dts --watch",
+		"build": "tsup --dts"
+	},
+	"devDependencies": {
+		"@repo/typescript-config": "workspace:*",
+		"tsup": "^8.1.0",
+		"typescript": "^5.4.5"
+	},
+	"dependencies": {
+		"zod": "^3.23.8"
+	}
+}

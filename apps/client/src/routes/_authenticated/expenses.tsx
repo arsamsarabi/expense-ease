@@ -13,10 +13,19 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useMemo } from 'react'
 
 async function getAllExpenses() {
 	const res = await api.expenses.$get()
+
+	if (res.status !== OK) {
+		throw new Error('Server error!')
+	}
+
+	return await res.json()
+}
+
+async function getTotalSpent() {
+	const res = await api.expenses['total-spent'].$get()
 
 	if (res.status !== OK) {
 		throw new Error('Server error!')
@@ -48,10 +57,14 @@ const Expenses = () => {
 		queryFn: getAllExpenses,
 	})
 
-	const totalSpent = useMemo(
-		() => data?.expenses.reduce((acc, expense) => acc + expense.amount, 0),
-		[data?.expenses]
-	)
+	const {
+		isPending: totalIsPending,
+		error: totalError,
+		data: totalData,
+	} = useQuery({
+		queryKey: ['get-total-spent'],
+		queryFn: getTotalSpent,
+	})
 
 	if (error) return `Something went wrong.. ${error.message}`
 
@@ -82,7 +95,13 @@ const Expenses = () => {
 				<TableFooter>
 					<TableRow>
 						<TableCell colSpan={2}>Total</TableCell>
-						<TableCell className="text-right">£{totalSpent}</TableCell>
+						<TableCell className="text-right">
+							{totalError
+								? 'Error fetching total spent...'
+								: totalIsPending
+									? 'loading...'
+									: `£${totalData?.total}`}
+						</TableCell>
 					</TableRow>
 				</TableFooter>
 			</Table>

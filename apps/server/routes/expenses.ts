@@ -1,26 +1,10 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { z } from 'zod'
 import { db } from '../db'
 import { expenses as expensesTable } from '../db/schema/expenses.schema'
-import { eq } from 'drizzle-orm'
+import { and, desc, eq, sum } from 'drizzle-orm'
 import { getUserMiddleware } from '../middlewares/auth.middleware'
-
-const expenseSchema = z.object({
-	id: z.number().int().positive().min(1),
-	title: z.string().min(3).max(100),
-	amount: z.string(),
-})
-
-const createPostSchema = expenseSchema.omit({ id: true })
-
-type Expense = z.infer<typeof expenseSchema>
-
-const fakeExpenses: Expense[] = [
-	{ id: 1, title: 'Groceries', amount: '60.0' },
-	{ id: 2, title: 'Electricity bill', amount: '80.0' },
-	{ id: 3, title: 'Mortgage', amount: '1350.0' },
-]
+import { createPostSchema } from '@repo/zod-shared-schema'
 
 export const expensesRoute = new Hono()
 	.get('/', getUserMiddleware, async (c) => {
@@ -29,12 +13,19 @@ export const expensesRoute = new Hono()
 			.select()
 			.from(expensesTable)
 			.where(eq(expensesTable.userId, user.id))
+			.orderBy(desc(expensesTable.createdAt))
 
 		return c.json({ expenses })
 	})
 	.get('/:id{[0-9]+}', getUserMiddleware, async (c) => {
+		const user = c.var.user
 		const id = Number.parseInt(c.req.param('id'))
-		const expense = fakeExpenses.find((expense) => expense.id === id)
+
+		const expense = await db
+			.select()
+			.from(expensesTable)
+			.where(and(eq(expensesTable.userId, user.id), eq(expensesTable.id, id)))
+			.then((res) => res[0])
 
 		if (!expense) {
 			return c.notFound()
@@ -43,8 +34,15 @@ export const expensesRoute = new Hono()
 		return c.json({ expense })
 	})
 	.get('/total-spent', getUserMiddleware, async (c) => {
-		const total = fakeExpenses.reduce((total, { amount }) => total + +amount, 0)
-		return c.json({ total })
+		const user = c.var.user
+		const result = await db
+			.select({ total: sum(expensesTable.amount) })
+			.from(expensesTable)
+			.where(eq(expensesTable.userId, user.id))
+			.limit(1)
+			.then((res) => res[0])
+
+		return c.json(result)
 	})
 	.post(
 		'/',
@@ -71,16 +69,20 @@ export const expensesRoute = new Hono()
 		}
 	)
 	.delete('/:id{[0-9]+}', getUserMiddleware, async (c) => {
+		const user = c.var.user
 		const id = Number.parseInt(c.req.param('id'))
-		const index = fakeExpenses.findIndex((expense) => expense.id === id)
 
-		if (index === -1) {
+		const expense = await db
+			.delete(expensesTable)
+			.where(and(eq(expensesTable.userId, user.id), eq(expensesTable.id, id)))
+			.returning()
+			.then((res) => res[0])
+
+		if (!expense) {
 			return c.notFound()
 		}
 
-		const deletedExpense = fakeExpenses.splice(index, 1)[0]
-
-		return c.json({ expense: deletedExpense })
+		return c.json({ expense })
 	})
 	.put('/', getUserMiddleware, (c) => {
 		return c.json({})

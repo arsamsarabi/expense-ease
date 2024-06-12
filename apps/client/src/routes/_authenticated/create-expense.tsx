@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
+import { zodValidator } from '@tanstack/zod-form-adapter'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -20,6 +22,7 @@ function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 const CreateExpense = () => {
 	const navigate = useNavigate()
 	const form = useForm({
+		validatorAdapter: zodValidator,
 		defaultValues: {
 			title: '',
 			amount: '0',
@@ -50,6 +53,12 @@ const CreateExpense = () => {
 				<div className="grid w-full max-w-sm items-center gap-1.5">
 					<form.Field
 						name="title"
+						validators={{
+							onChange: z
+								.string()
+								.min(3, 'Must be at least 3 characters long')
+								.max(100, "That's too long"),
+						}}
 						children={(field) => {
 							return (
 								<>
@@ -71,6 +80,9 @@ const CreateExpense = () => {
 					/>
 					<form.Field
 						name="amount"
+						validators={{
+							onChange: z.string().min(0, "Can't be empty"),
+						}}
 						children={(field) => {
 							return (
 								<>
