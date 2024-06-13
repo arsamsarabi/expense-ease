@@ -32,6 +32,7 @@ export const insertExpenseSchema = createInsertSchema(expenses, {
 	amount: z
 		.string()
 		.regex(/^\d+(\.\d{1,2})?$/, 'Amount must be a valid monetary value.'),
+	date: z.string(),
 })
 
 export const selectExpenseSchema = createSelectSchema(expenses)

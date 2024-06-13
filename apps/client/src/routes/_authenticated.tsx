@@ -1,4 +1,4 @@
-import { userQueryOptions } from '@/lib/api'
+import { getMeQueryOptions } from '@/lib/api'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
 const Login = () => {
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/_authenticated')({
 	beforeLoad: async ({ context }) => {
 		const queryClient = context.queryClient
 		try {
-			const data = await queryClient.fetchQuery(userQueryOptions)
+			const data = await queryClient.fetchQuery(getMeQueryOptions)
 			return data
 		} catch (error) {
 			console.error('Could not authenticate user.')

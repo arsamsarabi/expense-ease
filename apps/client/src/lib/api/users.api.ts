@@ -1,13 +1,8 @@
-import { hc } from 'hono/client'
-import type { ApiRoutes } from '@server/app'
 import { OK } from 'readable-http-codes'
 import { queryOptions } from '@tanstack/react-query'
+import { api } from './api'
 
-const client = hc<ApiRoutes>('/')
-
-export const api = client.api
-
-async function getMe() {
+const getMe = async () => {
 	const res = await api.auth.me.$get()
 
 	if (res.status !== OK) {
@@ -17,7 +12,7 @@ async function getMe() {
 	return await res.json()
 }
 
-export const userQueryOptions = queryOptions({
+export const getMeQueryOptions = queryOptions({
 	queryKey: ['get-me'],
 	queryFn: getMe,
 	staleTime: Infinity,

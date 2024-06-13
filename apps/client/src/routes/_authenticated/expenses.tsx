@@ -1,4 +1,4 @@
-import { api } from '@/lib/api'
+import { api, getAllExpensesQueryOptions } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { OK } from 'readable-http-codes'
@@ -13,16 +13,6 @@ import {
 	TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
-
-async function getAllExpenses() {
-	const res = await api.expenses.$get()
-
-	if (res.status !== OK) {
-		throw new Error('Server error!')
-	}
-
-	return await res.json()
-}
 
 async function getTotalSpent() {
 	const res = await api.expenses['total-spent'].$get()
@@ -55,10 +45,7 @@ const SkeletonLoader = () =>
 		))
 
 const Expenses = () => {
-	const { isPending, error, data } = useQuery({
-		queryKey: ['get-all-expenses'],
-		queryFn: getAllExpenses,
-	})
+	const { isPending, error, data } = useQuery(getAllExpensesQueryOptions)
 
 	const {
 		isPending: totalIsPending,

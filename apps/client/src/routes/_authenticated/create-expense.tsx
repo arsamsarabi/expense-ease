@@ -3,11 +3,11 @@ import { zodValidator } from '@tanstack/zod-form-adapter'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { useForm } from '@tanstack/react-form'
 import type { FieldApi } from '@tanstack/react-form'
-import { api } from '@/lib/api'
+import { api, getAllExpensesQueryOptions } from '@/lib/api'
 import { createExpenseSchema } from '@server/sharedTypes'
+import { useQueryClient } from '@tanstack/react-query'
 
 function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 	return (
@@ -22,19 +22,37 @@ function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 
 const CreateExpense = () => {
 	const navigate = useNavigate()
+	const queryClient = useQueryClient()
 	const form = useForm({
 		validatorAdapter: zodValidator,
 		defaultValues: {
 			title: '',
 			amount: '0',
-			date: new Date().toLocaleDateString(),
+			date: new Date().toISOString(),
 		},
 		onSubmit: async ({ value }) => {
+			console.group(
+				'%conSubmit',
+				'background-color: #009970; color: #d2f5eb; padding: 6px 24px; font-size: 18px; border-radius: 12px'
+			)
+			console.log({ value })
+			console.groupEnd()
+			const existingExpenses = await queryClient.ensureQueryData(
+				getAllExpensesQueryOptions
+			)
+
 			const res = await api.expenses.$post({ json: value })
 
 			if (!res.ok) {
 				throw new Error('Sever error')
 			}
+
+			const newExpense = await res.json()
+
+			queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, {
+				...existingExpenses,
+				expenses: [newExpense, ...existingExpenses.expenses],
+			})
 
 			navigate({ to: '/expenses' })
 		},
@@ -110,15 +128,15 @@ const CreateExpense = () => {
 						children={(field) => {
 							return (
 								<>
-									<Calendar
-										mode="single"
-										selected={new Date(field.state.value)}
-										onSelect={(date) =>
-											field.handleChange(
-												(date ?? new Date()).toLocaleDateString()
-											)
-										}
-										className="rounded-md border"
+									<Label htmlFor={field.name}>Amount:</Label>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										required
+										type="date"
 									/>
 								</>
 							)
