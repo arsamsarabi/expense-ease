@@ -2,6 +2,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Layout } from '@/components/layout'
 import { QueryClient } from '@tanstack/react-query'
+import { Toaster } from '@/components/ui/sonner'
 
 const Root = () => {
 	return (
@@ -10,6 +11,7 @@ const Root = () => {
 				<Outlet />
 			</Layout>
 			<TanStackRouterDevtools />
+			<Toaster />
 		</>
 	)
 }

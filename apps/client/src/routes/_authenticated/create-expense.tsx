@@ -5,9 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useForm } from '@tanstack/react-form'
 import type { FieldApi } from '@tanstack/react-form'
-import { api, getAllExpensesQueryOptions } from '@/lib/api'
+import {
+	createExpense,
+	getAllExpensesQueryOptions,
+	loadingCreateExpenseQueryOptions,
+} from '@/lib/api'
 import { createExpenseSchema } from '@server/sharedTypes'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 	return (
@@ -31,30 +36,32 @@ const CreateExpense = () => {
 			date: new Date().toISOString(),
 		},
 		onSubmit: async ({ value }) => {
-			console.group(
-				'%conSubmit',
-				'background-color: #009970; color: #d2f5eb; padding: 6px 24px; font-size: 18px; border-radius: 12px'
-			)
-			console.log({ value })
-			console.groupEnd()
 			const existingExpenses = await queryClient.ensureQueryData(
 				getAllExpensesQueryOptions
 			)
 
-			const res = await api.expenses.$post({ json: value })
+			navigate({ to: '/expenses' })
 
-			if (!res.ok) {
-				throw new Error('Sever error')
-			}
-
-			const newExpense = await res.json()
-
-			queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, {
-				...existingExpenses,
-				expenses: [newExpense, ...existingExpenses.expenses],
+			queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, {
+				expense: value,
 			})
 
-			navigate({ to: '/expenses' })
+			try {
+				const newExpense = await createExpense(value)
+				queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, {
+					...existingExpenses,
+					expenses: [newExpense, ...existingExpenses.expenses],
+				})
+				toast('Expense Created', {
+					description: `Successfully created a new expense. Expense ID: ${newExpense.id}`,
+				})
+			} catch (error) {
+				toast('Oh oh!', {
+					description: 'Failed to create a new expense.',
+				})
+			} finally {
+				queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, {})
+			}
 		},
 	})
 

@@ -1,4 +1,8 @@
-import { api, getAllExpensesQueryOptions } from '@/lib/api'
+import {
+	api,
+	getAllExpensesQueryOptions,
+	loadingCreateExpenseQueryOptions,
+} from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { OK } from 'readable-http-codes'
@@ -46,6 +50,9 @@ const SkeletonLoader = () =>
 
 const Expenses = () => {
 	const { isPending, error, data } = useQuery(getAllExpensesQueryOptions)
+	const { data: loadingCreateExpense } = useQuery(
+		loadingCreateExpenseQueryOptions
+	)
 
 	const {
 		isPending: totalIsPending,
@@ -71,6 +78,18 @@ const Expenses = () => {
 					</TableRow>
 				</TableHeader>
 				<TableBody>
+					{loadingCreateExpense?.expense && (
+						<TableRow>
+							<TableCell className="font-medium">
+								<Skeleton className="h-4" />
+							</TableCell>
+							<TableCell>{loadingCreateExpense?.expense.date}</TableCell>
+							<TableCell>{loadingCreateExpense?.expense.title}</TableCell>
+							<TableCell className="text-right">
+								£{loadingCreateExpense?.expense.amount}
+							</TableCell>
+						</TableRow>
+					)}
 					{isPending ? (
 						<SkeletonLoader />
 					) : (
