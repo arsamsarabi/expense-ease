@@ -48,6 +48,9 @@ const SkeletonLoader = () =>
 				<TableCell>
 					<Skeleton className="h-4" />
 				</TableCell>
+				<TableCell>
+					<Skeleton className="h-4" />
+				</TableCell>
 			</TableRow>
 		))
 
@@ -75,6 +78,7 @@ const Expenses = () => {
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[100px]">Id</TableHead>
+						<TableHead>Date</TableHead>
 						<TableHead>Title</TableHead>
 						<TableHead className="text-right">Amount</TableHead>
 					</TableRow>
@@ -83,9 +87,10 @@ const Expenses = () => {
 					{isPending ? (
 						<SkeletonLoader />
 					) : (
-						data?.expenses.map(({ id, title, amount }) => (
+						data?.expenses.map(({ id, title, amount, date }) => (
 							<TableRow key={id}>
 								<TableCell className="font-medium">{id}</TableCell>
+								<TableCell>{date}</TableCell>
 								<TableCell>{title}</TableCell>
 								<TableCell className="text-right">£{amount}</TableCell>
 							</TableRow>
@@ -94,7 +99,7 @@ const Expenses = () => {
 				</TableBody>
 				<TableFooter>
 					<TableRow>
-						<TableCell colSpan={2}>Total</TableCell>
+						<TableCell colSpan={3}>Total</TableCell>
 						<TableCell className="text-right">
 							{totalError
 								? 'Error fetching total spent...'

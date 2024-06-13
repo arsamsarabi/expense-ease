@@ -1,10 +1,13 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { db } from '../db'
-import { expenses as expensesTable } from '../db/schema/expenses.schema'
+import {
+	expenses as expensesTable,
+	insertExpenseSchema,
+} from '../db/schema/expenses.schema'
 import { and, desc, eq, sum } from 'drizzle-orm'
 import { getUserMiddleware } from '../middlewares/auth.middleware'
-import { createPostSchema } from '@repo/zod-shared-schema'
+import { createExpenseSchema } from '../sharedTypes'
 
 export const expensesRoute = new Hono()
 	.get('/', getUserMiddleware, async (c) => {
@@ -46,7 +49,7 @@ export const expensesRoute = new Hono()
 	})
 	.post(
 		'/',
-		zValidator('json', createPostSchema, (result, c) => {
+		zValidator('json', createExpenseSchema, (result, c) => {
 			if (!result.success) {
 				return c.text('Invalid!', 400)
 			}
@@ -56,12 +59,14 @@ export const expensesRoute = new Hono()
 			const user = c.var.user
 			const expense = await c.req.valid('json')
 
+			const validatedExpenseObject = insertExpenseSchema.parse({
+				...expense,
+				userId: user.id,
+			})
+
 			const result = await db
 				.insert(expensesTable)
-				.values({
-					...expense,
-					userId: user.id,
-				})
+				.values(validatedExpenseObject)
 				.returning()
 
 			c.status(201)

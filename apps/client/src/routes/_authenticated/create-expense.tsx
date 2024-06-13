@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-form-adapter'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { useForm } from '@tanstack/react-form'
 import type { FieldApi } from '@tanstack/react-form'
 import { api } from '@/lib/api'
+import { createExpenseSchema } from '@server/sharedTypes'
 
 function FieldInfo({ field }: { field: FieldApi<any, any, any, any> }) {
 	return (
@@ -26,6 +27,7 @@ const CreateExpense = () => {
 		defaultValues: {
 			title: '',
 			amount: '0',
+			date: new Date().toLocaleDateString(),
 		},
 		onSubmit: async ({ value }) => {
 			const res = await api.expenses.$post({ json: value })
@@ -43,7 +45,7 @@ const CreateExpense = () => {
 			<h2>Create Expense</h2>
 
 			<form
-				className="mt-8"
+				className="mt-8 w-[600px]"
 				onSubmit={(e) => {
 					e.preventDefault()
 					e.stopPropagation()
@@ -54,14 +56,11 @@ const CreateExpense = () => {
 					<form.Field
 						name="title"
 						validators={{
-							onChange: z
-								.string()
-								.min(3, 'Must be at least 3 characters long')
-								.max(100, "That's too long"),
+							onChange: createExpenseSchema.shape.title,
 						}}
 						children={(field) => {
 							return (
-								<>
+								<div className="w-full my-4">
 									<Label htmlFor={field.name}>Title:</Label>
 									<Input
 										id={field.name}
@@ -74,14 +73,14 @@ const CreateExpense = () => {
 										type="text"
 									/>
 									<FieldInfo field={field} />
-								</>
+								</div>
 							)
 						}}
 					/>
 					<form.Field
 						name="amount"
 						validators={{
-							onChange: z.string().min(0, "Can't be empty"),
+							onChange: createExpenseSchema.shape.amount,
 						}}
 						children={(field) => {
 							return (
@@ -102,6 +101,29 @@ const CreateExpense = () => {
 							)
 						}}
 					/>
+
+					<form.Field
+						name="date"
+						validators={{
+							onChange: createExpenseSchema.shape.date,
+						}}
+						children={(field) => {
+							return (
+								<>
+									<Calendar
+										mode="single"
+										selected={new Date(field.state.value)}
+										onSelect={(date) =>
+											field.handleChange(
+												(date ?? new Date()).toLocaleDateString()
+											)
+										}
+										className="rounded-md border"
+									/>
+								</>
+							)
+						}}
+					/>
 				</div>
 
 				<form.Subscribe
@@ -112,7 +134,7 @@ const CreateExpense = () => {
 							size="sm"
 							type="submit"
 							disabled={!canSubmit}
-							className="mt-4"
+							className="mt-4 w-full"
 						>
 							{isSubmitting ? 'Submitting...' : 'Create Expense'}
 						</Button>

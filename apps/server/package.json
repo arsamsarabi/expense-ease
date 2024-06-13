@@ -22,10 +22,10 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
-		"@repo/zod-shared-schema": "workspace:*",
 		"@hono/zod-validator": "^0.2.2",
 		"@kinde-oss/kinde-typescript-sdk": "^2.9.1",
 		"drizzle-orm": "^0.31.2",
+		"drizzle-zod": "^0.5.1",
 		"hono": "^4.4.4",
 		"postgres": "^3.4.4",
 		"zod": "^3.23.8"

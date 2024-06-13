@@ -15,6 +15,13 @@
       "when": 1718176051758,
       "tag": "0001_concerned_gateway",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1718264613546,
+      "tag": "0002_productive_whizzer",
+      "breakpoints": true
     }
   ]
 }
