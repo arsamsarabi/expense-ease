@@ -59,25 +59,16 @@ export const expensesRoute = new Hono()
 			const user = c.var.user
 			const expense = await c.req.valid('json')
 
-			console.log('server raw expense')
-			console.log(expense)
-
 			const validatedExpenseObject = insertExpenseSchema.parse({
 				...expense,
 				userId: user.id,
 			})
-
-			console.log('validatedExpenseObject')
-			console.log(validatedExpenseObject)
 
 			const result = await db
 				.insert(expensesTable)
 				.values(validatedExpenseObject)
 				.returning()
 				.then((res) => res[0])
-
-			console.log('result')
-			console.log(result)
 
 			c.status(201)
 			return c.json(result)
