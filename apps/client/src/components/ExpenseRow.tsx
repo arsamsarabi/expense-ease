@@ -1,11 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { EllipsisVertical, Trash2 } from 'lucide-react'
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Trash2 } from 'lucide-react'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { Expense } from '@server/sharedTypes'
 import { deleteExpense, getAllExpensesQueryOptions } from '@/lib/api'
@@ -55,25 +49,15 @@ export const ExpenseRow = ({ id, date, title, amount }: Props) => {
 			<TableCell>{title}</TableCell>
 			<TableCell className="text-right">£{amount}</TableCell>
 			<TableCell>
-				<DropdownMenu>
-					<DropdownMenuTrigger>
-						<EllipsisVertical className="h-4 w-4" />
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						<DropdownMenuItem>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="w-full"
-								onClick={() => mutation.mutate(id)}
-								disabled={mutation.isPending}
-							>
-								<Trash2 color="red" className="h-4 w-4" />
-								<p className="ml-2 text-red-500">Delete</p>
-							</Button>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<Button
+					variant="ghost"
+					size="sm"
+					className="w-full"
+					onClick={() => mutation.mutate(id)}
+					disabled={mutation.isPending}
+				>
+					<Trash2 color="red" className="h-4 w-4" />
+				</Button>
 			</TableCell>
 		</TableRow>
 	)
